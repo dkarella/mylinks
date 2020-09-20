@@ -18,6 +18,12 @@ func main() {
 	http.HandleFunc("/404", notFoundHandler)
 	http.HandleFunc("/", redirectHandler)
 
+	port := ":8080"
+	if p := os.Getenv("PORT"); p != "" {
+		port = p
+	}
+
+	log.Printf("listening on port %s", port)
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatal(err)
 	}
