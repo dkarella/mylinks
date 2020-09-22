@@ -15,6 +15,7 @@ var links map[string]string = make(map[string]string)
 func main() {
 	load()
 
+	http.HandleFunc("/health", healthCheckHandler)
 	http.HandleFunc("/404", notFoundHandler)
 	http.HandleFunc("/", redirectHandler)
 
@@ -41,6 +42,11 @@ func redirectHandler(w http.ResponseWriter, r *http.Request) {
 func notFoundHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotFound)
 	w.Write([]byte("not found"))
+}
+
+func healthCheckHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("ok"))
 }
 
 func load() {
