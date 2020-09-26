@@ -54,6 +54,7 @@ func load() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
 
@@ -68,5 +69,9 @@ func load() {
 		}
 
 		links[tokens[0]] = tokens[1]
+	}
+
+	if err := scanner.Err(); err != nil {
+		log.Fatal(err)
 	}
 }
