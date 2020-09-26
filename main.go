@@ -86,11 +86,6 @@ func (l *MyLinks) Load() error {
 	if err != nil {
 		return err
 	}
-	defer func() {
-		if err != nil {
-			file.Close()
-		}
-	}()
 
 	l.file = file
 	l.links = make(map[string]string)
@@ -104,6 +99,7 @@ func (l *MyLinks) Load() error {
 		tokens := strings.Split(line, ",")
 
 		if len(tokens) != 2 {
+			file.Close()
 			return fmt.Errorf("invalid line: %s", line)
 		}
 
@@ -111,6 +107,7 @@ func (l *MyLinks) Load() error {
 	}
 
 	if err := scanner.Err(); err != nil {
+		file.Close()
 		return err
 	}
 
