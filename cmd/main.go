@@ -1,25 +1,20 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
-	"strings"
+
+	"github.com/dkarella/mylinks/mylinks"
 )
 
 const fileName = "links.csv"
 
-type MyLinks struct {
-	file  *os.File
-	links map[string]string
-}
-
-var links MyLinks
+var links mylinks.T
 
 func main() {
-	if err := links.Load(); err != nil {
+	if err := links.Load(fileName); err != nil {
 		log.Fatal(fmt.Errorf("failed to load links: %s", err))
 	}
 	defer links.Close()
@@ -42,7 +37,7 @@ func main() {
 
 func redirectHandler(w http.ResponseWriter, r *http.Request) {
 	redirect := "/404"
-	if l, ok := links.links[r.URL.Path[1:]]; ok {
+	if l, ok := links.Get(r.URL.Path[1:]); ok {
 		redirect = l
 	}
 
@@ -79,49 +74,4 @@ func notFoundHandler(w http.ResponseWriter, r *http.Request) {
 func healthCheckHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("ok"))
-}
-
-func (l *MyLinks) Load() error {
-	file, err := os.OpenFile(fileName, os.O_APPEND|os.O_RDWR, os.ModeAppend)
-	if err != nil {
-		return err
-	}
-
-	l.file = file
-	l.links = make(map[string]string)
-
-	scanner := bufio.NewScanner(file)
-
-	scanner.Split(bufio.ScanLines)
-
-	for scanner.Scan() {
-		line := scanner.Text()
-		tokens := strings.Split(line, ",")
-
-		if len(tokens) != 2 {
-			file.Close()
-			return fmt.Errorf("invalid line: %s", line)
-		}
-
-		l.links[tokens[0]] = tokens[1]
-	}
-
-	if err := scanner.Err(); err != nil {
-		file.Close()
-		return err
-	}
-
-	return nil
-}
-
-func (l *MyLinks) Set(key, value string) error {
-	if _, err := l.file.WriteString(fmt.Sprintf("\n%s,%s", key, value)); err != nil {
-		return err
-	}
-	l.links[key] = value
-	return nil
-}
-
-func (l *MyLinks) Close() {
-	l.file.Close()
 }
