@@ -5,10 +5,13 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"sync"
 )
 
 // T is the struct responsible for getting and creating links
 type T struct {
+	sync.RWMutex
+
 	file  *os.File
 	links map[string]string
 }

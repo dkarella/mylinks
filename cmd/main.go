@@ -5,7 +5,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"sync"
 
 	"github.com/dkarella/mylinks/mylinks"
 )
@@ -13,7 +12,6 @@ import (
 const fileName = "links.csv"
 
 var links mylinks.T
-var lock sync.RWMutex
 
 func main() {
 	if err := links.Load(fileName); err != nil {
@@ -38,8 +36,8 @@ func main() {
 }
 
 func redirectHandler(w http.ResponseWriter, r *http.Request) {
-	lock.RLock()
-	defer lock.RUnlock()
+	links.RLock()
+	defer links.RUnlock()
 
 	redirect := "/404"
 	if l, ok := links.Get(r.URL.Path[1:]); ok {
@@ -50,8 +48,8 @@ func redirectHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func setLinkHandler(w http.ResponseWriter, r *http.Request) {
-	lock.Lock()
-	defer lock.Unlock()
+	links.Lock()
+	defer links.Unlock()
 
 	q := r.URL.Query()
 	key := q.Get("key")
