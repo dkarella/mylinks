@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"html/template"
 	"log"
@@ -10,7 +11,7 @@ import (
 	"github.com/dkarella/mylinks/mylinks"
 )
 
-const fileName = "links.csv"
+var fileName = flag.String("f", "links.csv", "file where links are loaded from and saved to")
 
 var setlinkTemplate = template.Must(template.New("setlink").Parse(`
 <!DOCTYPE html>
@@ -43,7 +44,7 @@ type setLinkValues struct {
 var links mylinks.T
 
 func main() {
-	if err := links.Load(fileName); err != nil {
+	if err := links.Load(*fileName); err != nil {
 		log.Fatal(fmt.Errorf("failed to load links: %s", err))
 	}
 	defer links.Close()
